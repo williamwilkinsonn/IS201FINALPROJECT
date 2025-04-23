@@ -1,0 +1,176 @@
+<!-- webapp.html (Cookie Catcher Game with Larger Milk Cup Image) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookie Catcher</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #fff8dc;
+      font-family: 'Fredoka One', cursive;
+    }
+    #gameCanvas {
+      display: block;
+      background: #f5deb3;
+      margin: 0 auto;
+      border: 5px solid #8b4513;
+    }
+    #gameOver {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: #8b0000;
+      text-align: center;
+      display: none;
+    }
+    #restartBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #d2691e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    a {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      color: #5a2d0c;
+      background: #fff;
+      padding: 8px 12px;
+      border: 2px solid #5a2d0c;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html">Back to Scratch Page</a>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="gameOver">
+    Game Over!<br>
+    <button id="restartBtn" onclick="restartGame()">Play Again</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const milkCup = {
+      x: 125,
+      y: 500,
+      width: 150, // doubled width
+      height: 160, // doubled height
+      speed: 14
+    };
+
+    const milkCupImage = new Image();
+    milkCupImage.src = "https://png.pngtree.com/png-clipart/20210328/original/pngtree-milk-splash-beverage-cup-protein-png-image_6159761.png";
+
+    let cookie;
+    let score;
+    let gameOver;
+
+    function createCookie() {
+      return {
+        x: Math.random() * 350,
+        y: 0,
+        radius: 20,
+        speed: 3
+      };
+    }
+
+    function drawCup() {
+      ctx.drawImage(milkCupImage, milkCup.x, milkCup.y, milkCup.width, milkCup.height);
+    }
+
+    function drawCookie() {
+      ctx.beginPath();
+      ctx.arc(cookie.x, cookie.y, cookie.radius, 0, Math.PI * 2);
+      ctx.fillStyle = "#d2691e";
+      ctx.fill();
+
+      ctx.fillStyle = "#4b2e14";
+      for (let i = 0; i < 5; i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let r = Math.random() * (cookie.radius - 5);
+        let cx = cookie.x + r * Math.cos(angle);
+        let cy = cookie.y + r * Math.sin(angle);
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawScore() {
+      ctx.fillStyle = "#000000";
+      ctx.font = "20px Fredoka One";
+      ctx.fillText("Score: " + score, 10, 25);
+    }
+
+    function resetCookie() {
+      cookie = createCookie();
+      cookie.speed += score * 0.2;
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCup();
+      drawCookie();
+      drawScore();
+
+      cookie.y += cookie.speed;
+
+      if (
+        cookie.y + cookie.radius >= milkCup.y &&
+        cookie.x > milkCup.x &&
+        cookie.x < milkCup.x + milkCup.width
+      ) {
+        score++;
+        resetCookie();
+      }
+
+      if (cookie.y > canvas.height) {
+        document.getElementById("gameOver").style.display = "block";
+        gameOver = true;
+        return;
+      }
+
+      if (!gameOver) {
+        requestAnimationFrame(update);
+      }
+    }
+
+    function restartGame() {
+      score = 0;
+      cookie = createCookie();
+      gameOver = false;
+      document.getElementById("gameOver").style.display = "none";
+      update();
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft" && milkCup.x > 0) {
+        milkCup.x -= milkCup.speed;
+      } else if (e.key === "ArrowRight" && milkCup.x + milkCup.width < canvas.width) {
+        milkCup.x += milkCup.speed;
+      }
+    });
+
+    milkCupImage.onload = () => {
+      restartGame();
+    };
+  </script>
+</body>
+</html>
